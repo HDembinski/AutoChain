@@ -1,11 +1,9 @@
 import os.path
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Tuple, Any, Dict
+from typing import Any, Dict, List, Tuple
 
 import pandas as pd
-from colorama import Fore
-
 from autochain.agent.message import UserMessage
 from autochain.chain import constants
 from autochain.chain.base_chain import BaseChain
@@ -14,6 +12,7 @@ from autochain.models.chat_openai import ChatOpenAI
 from autochain.tools.base import Tool
 from autochain.utils import print_with_color
 from autochain.workflows_evaluation.test_utils import parse_evaluation_response
+from colorama import Fore
 
 
 @dataclass
@@ -93,7 +92,7 @@ class WorkflowTester:
                     "test_name": test_case.test_name,
                     "conversation_history": [
                         f"{user_type}: {message}"
-                        for user_type, message, in conversation_history
+                        for user_type, message in conversation_history
                     ],
                     "num_turns": len(conversation_history),
                     "expected_outcome": test_case.expected_outcome,

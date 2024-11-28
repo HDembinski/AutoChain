@@ -161,7 +161,7 @@ class ChatOpenAI(BaseLanguageModel):
     """Maximum number of tokens to generate."""
     model_config = ConfigDict(extra="ignore")
 
-    @model_validator()
+    @model_validator(mode="before")
     @classmethod
     def validate_environment(cls, values: Dict) -> Dict:
         """Validate that api key and python package exists in environment."""
