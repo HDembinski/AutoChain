@@ -1,9 +1,9 @@
 """Util that calls Google Search."""
+
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Extra, root_validator
-
 from autochain.utils import get_from_dict_or_env
+from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class GoogleSearchAPIWrapper(BaseModel):
@@ -45,16 +45,12 @@ class GoogleSearchAPIWrapper(BaseModel):
     .com
     """
 
-    search_engine: Any  #: :meta private:
+    search_engine: Any = None  #: :meta private:
     google_api_key: Optional[str] = None
     google_cse_id: Optional[str] = None
     k: int = 10
     siterestrict: bool = False
-
-    class Config:
-        """Configuration for this pydantic object."""
-
-        extra = Extra.forbid
+    model_config = ConfigDict(extra="forbid")
 
     def _google_search_results(self, search_term: str, **kwargs: Any) -> List[dict]:
         cse = self.search_engine.cse()
@@ -63,7 +59,8 @@ class GoogleSearchAPIWrapper(BaseModel):
         res = cse.list(q=search_term, cx=self.google_cse_id, **kwargs).execute()
         return res.get("items", [])
 
-    @root_validator()
+    @model_validator()
+    @classmethod
     def validate_environment(cls, values: Dict) -> Dict:
         """Validate that api key and python package exists in environment."""
         google_api_key = get_from_dict_or_env(
@@ -77,8 +74,8 @@ class GoogleSearchAPIWrapper(BaseModel):
         try:
             from googleapiclient.discovery import build
 
-        except ImportError:
-            raise ImportError(
+        except ImportError as err:
+            raise ImportError from err(
                 "google-api-python-client is not installed. "
                 "Please install it with `pip install google-api-python-client`"
             )

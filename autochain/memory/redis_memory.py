@@ -1,19 +1,19 @@
 import pickle
-from typing import Any, Optional, Dict
+from typing import Any, Dict, Optional
 
 from autochain.agent.message import (
-    ChatMessageHistory,
-    MessageType,
-    BaseMessage,
     AIMessage,
-    UserMessage,
+    BaseMessage,
+    ChatMessageHistory,
     FunctionMessage,
+    MessageType,
     SystemMessage,
+    UserMessage,
 )
 from autochain.memory.base import BaseMemory
-from redis import Redis
-
 from autochain.memory.constants import ONE_HOUR
+from pydantic import ConfigDict
+from redis import Redis
 
 
 class RedisMemory(BaseMemory):
@@ -22,11 +22,7 @@ class RedisMemory(BaseMemory):
     expire_time: int = ONE_HOUR
     redis_key_prefix: str
     redis_client: Redis
-
-    class Config:
-        """Configuration for this pydantic object."""
-
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def load_memory(
         self, key: Optional[str] = None, default: Optional[Any] = None, **kwargs

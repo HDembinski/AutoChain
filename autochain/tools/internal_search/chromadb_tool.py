@@ -1,13 +1,12 @@
 import uuid
 from dataclasses import dataclass, field
-from typing import List, Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import chromadb
-from chromadb.api import QueryResult
-from pydantic import Extra
-
 from autochain.tools.base import Tool
 from autochain.tools.internal_search.base_search_tool import BaseSearchTool
+from chromadb.api import QueryResult
+from pydantic import ConfigDict
 
 
 @dataclass
@@ -24,12 +23,7 @@ class ChromaDBSearch(Tool, BaseSearchTool):
 
     collection_name: str = "index"
     collection: Optional[Any] = None
-
-    class Config:
-        """Configuration for this pydantic object."""
-
-        extra = Extra.forbid
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
     def __init__(self, docs: List[ChromaDoc], **kwargs):
         super().__init__(**kwargs)

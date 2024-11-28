@@ -1,4 +1,5 @@
 """OpenAI chat wrapper."""
+
 from __future__ import annotations
 
 import enum
@@ -8,21 +9,20 @@ import os
 import re
 from typing import Any, Dict, List, Mapping, Optional, Tuple, Union
 
-from pydantic import Extra, Field, root_validator
-
 from autochain.agent.message import (
-    BaseMessage,
-    UserMessage,
     AIMessage,
-    SystemMessage,
+    BaseMessage,
     FunctionMessage,
+    SystemMessage,
+    UserMessage,
 )
 from autochain.models.base import (
-    LLMResult,
-    Generation,
     BaseLanguageModel,
+    Generation,
+    LLMResult,
 )
 from autochain.tools.base import Tool
+from pydantic import ConfigDict, Field, model_validator
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +131,7 @@ class ChatOpenAI(BaseLanguageModel):
             openai = ChatOpenAI()
     """
 
-    client: Any  #: :meta private:
+    client: Any = None  #: :meta private:
     model_name: str = "gpt-3.5-turbo"
     """Model name to use."""
     temperature: float = 0
@@ -159,13 +159,10 @@ class ChatOpenAI(BaseLanguageModel):
     # """Number of chat completions to generate for each prompt."""
     max_tokens: Optional[int] = None
     """Maximum number of tokens to generate."""
+    model_config = ConfigDict(extra="ignore")
 
-    class Config:
-        """Configuration for this pydantic object."""
-
-        extra = Extra.ignore
-
-    @root_validator()
+    @model_validator()
+    @classmethod
     def validate_environment(cls, values: Dict) -> Dict:
         """Validate that api key and python package exists in environment."""
         openai_api_key = os.environ["OPENAI_API_KEY"]
@@ -174,8 +171,8 @@ class ChatOpenAI(BaseLanguageModel):
         try:
             import openai
 
-        except ImportError:
-            raise ValueError(
+        except ImportError as err:
+            raise ValueError from err(
                 "Could not import openai python package. "
                 "Please install it with `pip install openai`."
             )
@@ -184,11 +181,13 @@ class ChatOpenAI(BaseLanguageModel):
         if openai_api_base:
             values["api_base"] = openai.api_base = openai_api_base
         if openai_api_type == "azure":
-            values["azure_api_version"] = openai.api_version = os.environ.get("OPENAI_API_VERSION", "2023-05-15")
+            values["azure_api_version"] = openai.api_version = os.environ.get(
+                "OPENAI_API_VERSION", "2023-05-15"
+            )
         try:
             values["client"] = openai.ChatCompletion
-        except AttributeError:
-            raise ValueError(
+        except AttributeError as err:
+            raise ValueError from err(
                 "`openai` has no `ChatCompletion` attribute, this is likely "
                 "due to an old version of the openai package. Try upgrading it "
                 "with `pip install --upgrade openai`."

@@ -40,16 +40,16 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.8.1"
 colorama = ">=0.4.6"
-pydantic = "^1.10.9"
-google-api-python-client = {version = ">=2.89.0", optional = true}
+pydantic = ">=1.10.9"
+google-api-python-client = { version = ">=2.89.0", optional = true }
 chromadb = ">=0.3.26"
-lancedb = {version = ">=0.1.16", optional = true}
+lancedb = { version = ">=0.1.16", optional = true }
 pandas = ">=2.0.2"
 openai = ">=0.27.8"
 types-colorama = ">=0.4.15.11"
 pytest = "^7.3.2"
 redis = "^4.6.0"
-pinecone-client = {version = "^2.2.2", optional = true}
+pinecone-client = { version = "^2.2.2", optional = true }
 mkdocs-git-authors-plugin = "^0.7.2"
 tenacity = "^8.2.2"
 
@@ -64,7 +64,7 @@ mdx-include = "^1.4.2"
 Pillow = "^9.3.0"
 CairoSVG = "^2.5.2"
 pytest = "^7.3.2"
-coverage = {extras = ["toml"], version = "^7.3.0"}
+coverage = { extras = ["toml"], version = "^7.3.0" }
 
 [build-system]
 requires = ["poetry-core"]
@@ -72,18 +72,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.extras]
 google = ["google-api-python-client"]
-pinecone= ["pinecone-client"]
+pinecone = ["pinecone-client"]
 lancedb = ["lancedb"]
 
 [tool.mypy]
 strict = true
 
 [[tool.mypy.overrides]]
-module = [
-    "googleapiclient.discovery",
-    "chromadb",
-    "chromadb.api",
-]
+module = ["googleapiclient.discovery", "chromadb", "chromadb.api"]
 ignore_missing_imports = true
 
 [tool.ruff]

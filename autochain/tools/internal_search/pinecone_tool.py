@@ -1,13 +1,12 @@
 import uuid
 from dataclasses import dataclass, field
-from typing import List, Any, Optional, Dict
+from typing import Any, Dict, List, Optional
 
 import pinecone
-from pinecone import QueryResponse
-
 from autochain.models.base import BaseLanguageModel
 from autochain.tools.base import Tool
 from autochain.tools.internal_search.base_search_tool import BaseSearchTool
+from pinecone import QueryResponse
 
 
 @dataclass

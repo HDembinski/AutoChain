@@ -1,14 +1,13 @@
 from abc import abstractmethod
 from typing import Any, List
 
-from pydantic import Extra, BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class BaseSearchTool(BaseModel):
-    class Config:
-        """Configuration for this pydantic object."""
+    model_config = ConfigDict()
 
-    extra = Extra.forbid
+    extra = "forbid"
     arbitrary_types_allowed = True
 
     @abstractmethod

@@ -1,4 +1,5 @@
 """Base implementation for tools or skills."""
+
 from __future__ import annotations
 
 import inspect
@@ -6,10 +7,7 @@ from abc import ABC
 from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
 from autochain.errors import ToolRunningError
-from pydantic import (
-    BaseModel,
-    root_validator,
-)
+from pydantic import BaseModel, model_validator
 
 
 class Tool(ABC, BaseModel):
@@ -35,7 +33,8 @@ class Tool(ABC, BaseModel):
 
     func: Union[Callable[..., str], None] = None
 
-    @root_validator()
+    @model_validator()
+    @classmethod
     def validate_environment(cls, values: Dict) -> Dict:
         """Validate that api key and python package exists in environment."""
         func = values.get("func")

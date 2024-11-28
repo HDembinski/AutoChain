@@ -1,13 +1,10 @@
 import os
-from typing import List, Optional, Any, Dict
-
-from pydantic import root_validator
-
-from autochain.tools.base import Tool
+from typing import Any, Dict, List, Optional
 
 from autochain.agent.message import BaseMessage
-
-from autochain.models.base import BaseLanguageModel, LLMResult, EmbeddingResult
+from autochain.models.base import BaseLanguageModel, EmbeddingResult, LLMResult
+from autochain.tools.base import Tool
+from pydantic import model_validator
 
 
 class OpenAIAdaEncoder(BaseLanguageModel):
@@ -15,26 +12,27 @@ class OpenAIAdaEncoder(BaseLanguageModel):
     Text encoder using OpenAI Model
     """
 
-    client: Any  #: :meta private:
+    client: Any = None  #: :meta private:
     model_name: str = "text-embedding-ada-002"
 
-    @root_validator()
+    @model_validator()
+    @classmethod
     def validate_environment(cls, values: Dict) -> Dict:
         """Validate that api key and python package exists in environment."""
         openai_api_key = os.environ["OPENAI_API_KEY"]
         try:
             import openai
 
-        except ImportError:
-            raise ValueError(
+        except ImportError as err:
+            raise ValueError from err(
                 "Could not import openai python package. "
                 "Please install it with `pip install openai`."
             )
         openai.api_key = openai_api_key
         try:
             values["client"] = openai.Embedding
-        except AttributeError:
-            raise ValueError(
+        except AttributeError as err:
+            raise ValueError from err(
                 "`openai` has no `ChatCompletion` attribute, this is likely "
                 "due to an old version of the openai package. Try upgrading it "
                 "with `pip install --upgrade openai`."

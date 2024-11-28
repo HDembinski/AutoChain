@@ -1,23 +1,23 @@
 """OpenAI chat wrapper."""
+
 from __future__ import annotations
 
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
-from pydantic import Field
-from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
-
 from autochain.agent.message import (
-    BaseMessage,
     AIMessage,
+    BaseMessage,
 )
 from autochain.models.base import (
-    LLMResult,
-    Generation,
     BaseLanguageModel,
+    Generation,
+    LLMResult,
 )
 from autochain.tools.base import Tool
+from pydantic import ConfigDict, Field
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -59,13 +59,9 @@ class HuggingFaceTextGenerationModel(BaseLanguageModel):
     """Model will generate tokens up to the number of max token, so it would be good to have 
     default stop token"""
 
-    model: Optional[AutoModelForCausalLM]
-    tokenizer: Optional[AutoTokenizer]
-
-    class Config:
-        """Configuration for this pydantic object."""
-
-        arbitrary_types_allowed = True
+    model: Optional[AutoModelForCausalLM] = None
+    tokenizer: Optional[AutoTokenizer] = None
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

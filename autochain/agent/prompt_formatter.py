@@ -1,9 +1,8 @@
 from string import Template
 from typing import Any, List
 
-from pydantic import BaseModel, Extra
-
 from autochain.agent.message import BaseMessage, UserMessage
+from pydantic import BaseModel, ConfigDict
 
 
 class JSONPromptTemplate(BaseModel):
@@ -16,12 +15,7 @@ class JSONPromptTemplate(BaseModel):
 
     input_variables: List[str]
     """A list of the names of the variables the prompt template expects."""
-
-    class Config:
-        """Configuration for this pydantic object."""
-
-        extra = Extra.forbid
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
     def format_prompt(self, **kwargs: Any) -> List[BaseMessage]:
         variables = {v: "" for v in self.input_variables}

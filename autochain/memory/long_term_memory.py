@@ -5,17 +5,20 @@ conversation_history stores all the messages including FunctionMessage between a
 long_term_memory stores a collection of ChromaDoc (or would be modified use other vectory db)
 kv_memory: stores anything else as kv pairs
 """
+
 from typing import Any, Optional
 
 from autochain.agent.message import ChatMessageHistory, MessageType
 from autochain.memory.base import BaseMemory
 from autochain.tools.internal_search.base_search_tool import BaseSearchTool
 from autochain.tools.internal_search.chromadb_tool import ChromaDBSearch, ChromaDoc
-from autochain.tools.internal_search.pinecone_tool import PineconeSearch, PineconeDoc
-from autochain.tools.internal_search.lancedb_tool import LanceDBSeach, LanceDBDoc
+from autochain.tools.internal_search.lancedb_tool import LanceDBDoc, LanceDBSeach
+from autochain.tools.internal_search.pinecone_tool import PineconeDoc, PineconeSearch
+from pydantic import ConfigDict
 
 SEARCH_PROVIDERS = (ChromaDBSearch, PineconeSearch, LanceDBSeach)
 SEARCH_DOC_TYPES = (ChromaDoc, PineconeDoc, LanceDBDoc)
+
 
 class LongTermMemory(BaseMemory):
     """Buffer for storing conversation memory and an in-memory kv store."""
@@ -23,16 +26,14 @@ class LongTermMemory(BaseMemory):
     conversation_history = ChatMessageHistory()
     kv_memory = {}
     long_term_memory: BaseSearchTool = None
-
-    class Config:
-        keep_untouched = SEARCH_PROVIDERS
+    model_config = ConfigDict(ignored_types=SEARCH_PROVIDERS)
 
     def load_memory(
         self,
         key: Optional[str] = None,
         default: Optional[Any] = None,
         top_k: int = 1,
-        **kwargs
+        **kwargs,
     ) -> Any:
         """Return history buffer by key or all memories."""
         if key in self.kv_memory:

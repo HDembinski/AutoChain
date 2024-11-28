@@ -4,7 +4,9 @@ import logging
 from abc import abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from pydantic import Extra, Field, BaseModel
+from autochain.agent.message import BaseMessage
+from autochain.tools.base import Tool
+from pydantic import BaseModel, ConfigDict, Field
 from tenacity import (
     before_sleep_log,
     retry,
@@ -12,9 +14,6 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
 )
-
-from autochain.agent.message import BaseMessage
-from autochain.tools.base import Tool
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +61,7 @@ class BaseLanguageModel(BaseModel):
             openai = ChatOpenAI(model_name="gpt-3.5-turbo")
     """
 
-    client: Any  #: :meta private:
+    client: Any = None  #: :meta private:
     model_name: str = "gpt-3.5-turbo"
     """Model name to use."""
     temperature: float = 0.7
@@ -79,11 +78,7 @@ class BaseLanguageModel(BaseModel):
     """Number of chat completions to generate for each prompt."""
     max_tokens: Optional[int] = None
     """Maximum number of tokens to generate."""
-
-    class Config:
-        """Configuration for this pydantic object."""
-
-        extra = Extra.ignore
+    model_config = ConfigDict(extra="ignore")
 
     @property
     def _default_params(self) -> Dict[str, Any]:

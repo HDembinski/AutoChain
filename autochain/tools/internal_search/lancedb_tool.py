@@ -1,17 +1,19 @@
-from typing import List, Any
 from dataclasses import dataclass
+from typing import Any, List
 
 import lancedb
 import pandas as pd
-
-from autochain.tools.base import Tool
 from autochain.models.base import BaseLanguageModel
+from autochain.tools.base import Tool
 from autochain.tools.internal_search.base_search_tool import BaseSearchTool
+from pydantic import ConfigDict
+
 
 @dataclass
 class LanceDBDoc:
     doc: str
     vector: List[float] = None
+
 
 class LanceDBSeach(Tool, BaseSearchTool):
     """
@@ -26,10 +28,8 @@ class LanceDBSeach(Tool, BaseSearchTool):
         encoder: the encoder used to encode the documents. Default to None
         docs: the documents to be indexed. Default to None
     """
-    class Config:
-        """Configuration for this pydantic object."""
 
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     docs: List[LanceDBDoc]
     uri: str = "lancedb"
@@ -38,15 +38,18 @@ class LanceDBSeach(Tool, BaseSearchTool):
     encoder: BaseLanguageModel = None
     db: lancedb.db.DBConnection = None
     table: lancedb.table.Table = None
+
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.db = lancedb.connect(self.uri)
         if self.docs:
             self._encode_docs(self.docs)
             self._create_table(self.docs)
-    
+
     def _create_table(self, docs: List[LanceDBDoc]) -> None:
-        self.table = self.db.create_table(self.table_name, self._docs_to_dataframe(docs), mode="overwrite")
+        self.table = self.db.create_table(
+            self.table_name, self._docs_to_dataframe(docs), mode="overwrite"
+        )
 
     def _encode_docs(self, docs: List[LanceDBDoc]) -> None:
         for doc in docs:
@@ -54,15 +57,10 @@ class LanceDBSeach(Tool, BaseSearchTool):
                 if not self.encoder:
                     raise ValueError("Encoder is not provided for encoding docs")
                 doc.vector = self.encoder.encode([doc.doc]).embeddings[0]
-    
+
     def _docs_to_dataframe(self, docs: List[LanceDBDoc]) -> pd.DataFrame:
-        return pd.DataFrame(
-            [
-                {"doc": doc.doc, "vector": doc.vector}
-                for doc in docs
-            ]
-        )
-    
+        return pd.DataFrame([{"doc": doc.doc, "vector": doc.vector} for doc in docs])
+
     def _run(
         self,
         query: str,
@@ -76,15 +74,17 @@ class LanceDBSeach(Tool, BaseSearchTool):
         embeddings = self.encoder.encode([query]).embeddings[0]
         result = self.table.search(embeddings).limit(top_k).to_df()["doc"].to_list()
 
-        return  "\n".join([f"Doc {i}: {doc}" for i, doc in enumerate(result)])
+        return "\n".join([f"Doc {i}: {doc}" for i, doc in enumerate(result)])
 
     def add_docs(self, docs: List[LanceDBDoc], **kwargs):
         if not len(docs):
             return
 
         self._encode_docs(docs)
-        self.table.add(self._docs_to_dataframe(docs)) if self.table else self._create_table(docs)
-    
+        self.table.add(
+            self._docs_to_dataframe(docs)
+        ) if self.table else self._create_table(docs)
+
     def clear_index(self):
         if self.table_name in self.db.table_names():
             self.db.drop_table(self.table_name)
