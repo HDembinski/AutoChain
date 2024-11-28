@@ -1,4 +1,5 @@
 """Default implementation of Chain"""
+
 import logging
 from typing import Dict
 
@@ -19,7 +20,7 @@ class Chain(BaseChain):
     """
 
     return_intermediate_steps: bool = False
-    handle_parsing_errors = True
+    handle_parsing_errors: bool = True
     graceful_exit_tool: Tool = HandOffToAgent()
 
     def handle_repeated_action(self, agent_action: AgentAction) -> AgentFinish:

@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from autochain.agent.message import ChatMessageHistory, MessageType
 from autochain.memory.base import BaseMemory
@@ -7,8 +7,8 @@ from autochain.memory.base import BaseMemory
 class BufferMemory(BaseMemory):
     """Buffer for storing conversation memory and an in-memory kv store."""
 
-    conversation_history = ChatMessageHistory()
-    kv_memory = {}
+    conversation_history: ChatMessageHistory = ChatMessageHistory()
+    kv_memory: Dict[str, Any] = {}
 
     def load_memory(
         self, key: Optional[str] = None, default: Optional[Any] = None, **kwargs
